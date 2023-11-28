@@ -6,8 +6,13 @@ from rest_framework.mixins import RetrieveModelMixin
 from .models import *
 
 
+class CarViewSet(ModelViewSet, RetrieveModelMixin):
+    queryset = Car.objects.all()
+    serializer_class = CarSerializer
+
+
 class CompanyViewSet(ModelViewSet):
-    queryset = Company.objects.all()
+    queryset = Company.objects.select_related('product').all()
     serializer_class = CompanySerializer
 
 
