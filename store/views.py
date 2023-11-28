@@ -6,11 +6,6 @@ from rest_framework.mixins import RetrieveModelMixin
 from .models import *
 
 
-class CarViewSet(ModelViewSet, RetrieveModelMixin):
-    queryset = Car.objects.all()
-    serializer_class = CarSerializer
-
-
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
