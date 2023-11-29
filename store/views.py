@@ -12,7 +12,7 @@ class CarViewSet(ModelViewSet, RetrieveModelMixin):
 
 
 class CompanyViewSet(ModelViewSet):
-    queryset = Company.objects.select_related('product').all()
+    queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
 

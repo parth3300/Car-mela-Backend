@@ -13,16 +13,13 @@ class CompanySerializer(serializers.ModelSerializer):
 class CarSerializer(serializers.ModelSerializer):
     company_url = serializers.HyperlinkedRelatedField(
         view_name='company-detail', read_only=True, source='company')
-    company_title = serializers.SerializerMethodField(
-        method_name='get_company_title', read_only=True)
-
-    def get_company_title(self, request):
-        return request.company.title
+    company_title = serializers.CharField(
+        source='company.title', read_only=True)
 
     class Meta:
         model = Car
         fields = ['id', 'title', 'company_title', 'company_url', 'carmodel', 'color', 'mileage',
-                  'descriptioin', 'transmission', 'fuel_type', 'price', 'ratings']
+                  'description', 'transmission', 'fuel_type', 'price', 'ratings']
 
 
 class ReviewSerializer(serializers.ModelSerializer):

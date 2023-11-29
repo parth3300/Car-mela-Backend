@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 
@@ -10,50 +11,72 @@ class Company(models.Model):
 
 
 class Car(models.Model):
-    TRANSMISSION_CHOICE = [('Autometic', 'Autometic'), ('Menual', 'Menual')]
-    FUAL_CHOICE = [(
-        'Petrol', 'Petrol'), ('Diesel', 'Diesel'), ('Electric', 'Electric'), ('CNG', 'CNG')]
-    YEAR_CHOICE = [('2013', '2013'), ('2014', '2014'), ('2015', '2015'), ('2016', '2016'), ('2017', '2017'),
-                   ('2018', '2018'), ('2019', '2019'), ('2020', '2020'), ('2021', '2021'), ('2022', '2022'), ('2023', '2023')]
+    TRANSMISSION_CHOICE = [('Automatic', 'Automatic'), ('Manual', 'Manual')]
+    FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
+                   ('Electric', 'Electric'), ('CNG', 'CNG')]
+    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
+
     title = models.CharField(max_length=255)
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=20)
-    registration_year = models.IntegerField(choices=YEAR_CHOICE)
+    registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     mileage = models.IntegerField()
-    fuel_type = models.CharField(max_length=20, choices=FUAL_CHOICE)
+    fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICE)
     transmission = models.CharField(
-        max_length=255, choices=TRANSMISSION_CHOICE)
+        max_length=255, choices=TRANSMISSION_CHOICE, default='Automatic')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    descriptioin = models.TextField(null=True)
+    description = models.TextField(null=True)
     ratings = models.IntegerField()
     last_update = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        return self.title
+
 
 class CarOwner(models.Model):
-    firstname = models.CharField(max_length=50)
-    lastname = models.CharField(max_length=50)
-    email = models.EmailField()
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+
     phone = models.IntegerField()
     address = models.TextField()
+
+    def first_name(self):
+        return self.user.first_name
+
+    def last_name(self):
+        return self.user.last_name
 
 
 class Customer(models.Model):
-    firstname = models.CharField(max_length=50)
-    lastname = models.CharField(max_length=50)
-    email = models.EmailField()
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
     phone = models.IntegerField()
     address = models.TextField()
+
+    def first_name(self):
+        return self.user.first_name
+
+    def last_name(self):
+        return self.user.last_name
 
 
 class Dealer(models.Model):
-    dealership_name = models.CharField(max_length=50)
-    firstname = models.CharField(max_length=40)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
 
-    lastname = models.CharField(max_length=50)
-    email = models.EmailField()
-    phone = models.IntegerField()
+    dealership_name = models.CharField(max_length=50)
     address = models.TextField()
+    phone = models.DecimalField(max_digits=12, decimal_places=0)
+
+    def first_name(self):
+        return self.user.first_name
+
+    def last_name(self):
+        return self.user.last_name
 
 
 class Review(models.Model):
