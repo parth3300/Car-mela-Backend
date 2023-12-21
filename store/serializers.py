@@ -100,7 +100,7 @@ class CarSerializer(serializers.ModelSerializer):
         return car.owned_by.user.username
 
     class Meta:
-        model = Car
+        model = CarWithOwnerShip
         fields = ['id', 'owned_by', 'title', 'company', 'registration_year', 'carmodel', 'color', 'mileage',
                   'description', 'fuel_type', 'ratings']
 
@@ -121,7 +121,7 @@ class CarCreateSerializer(serializers.ModelSerializer):
         return user.username
 
     class Meta:
-        model = Car
+        model = CarWithOwnerShip
         fields = ['id', 'owned_by', 'title',  'company', 'company_title', 'registration_year', 'carmodel', 'color', 'mileage',
                   'description', 'fuel_type', 'price', 'ratings']
         extra_kwargs = {
@@ -132,7 +132,7 @@ class CarCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         owned_by, created = CarOwner.objects.get_or_create(user=user)
         validated_data.pop('owned_by', None)
-        car = Car.objects.create(owned_by=owned_by, **validated_data)
+        car = CarWithOwnerShip.objects.create(owned_by=owned_by, **validated_data)
         return car
 
 # for admin
@@ -147,7 +147,7 @@ class AdminCarSerializer(serializers.ModelSerializer):
         return car.owned_by.user.username
 
     class Meta:
-        model = Car
+        model = CarWithOwnerShip
         fields = '__all__'
 
 # created carowner details for annonymous user
@@ -172,7 +172,7 @@ class CustomeCarSerializer(serializers.ModelSerializer):
     owned_by = SimpleCarOwnerSerializer()
 
     class Meta:
-        model = Car
+        model = CarWithOwnerShip
         fields = ['id', 'owned_by', 'title', 'company', 'registration_year', 'carmodel', 'color', 'mileage',
                   'description', 'fuel_type', 'price', 'ratings']
 

@@ -58,6 +58,34 @@ class DealerShipManager(models.Manager):
             content_type=obj_type, object_id=obj_id)
 
 
+class CarWithOwnerShip(models.Model):
+    FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
+                   ('Electric', 'Electric'), ('CNG', 'CNG')]
+    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
+    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
+                      ('4', '4'), ('5', '5')]
+
+    title = models.CharField(max_length=255)
+    # this forignkey access  to carowner table, carowned access to Car table
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name='carwithownership')
+    owned_by = models.ForeignKey(
+        CarOwner, on_delete=models.CASCADE, related_name='car_owned')
+    carmodel = models.CharField(max_length=50)
+    color = models.CharField(max_length=20)
+    registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
+    mileage = models.IntegerField()
+    fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICE)
+
+    description = models.TextField(null=True)
+    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
+    last_update = models.DateTimeField(auto_now_add=True)
+    price = models.BigIntegerField()
+
+    def __str__(self) -> str:
+        return self.title
+
+
 class DealerShip(models.Model):
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
@@ -99,35 +127,6 @@ class DealerShipFor(models.Model):
     content_object = GenericForeignKey()
 
 
-class Car(models.Model):
-    FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
-                   ('Electric', 'Electric'), ('CNG', 'CNG')]
-    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
-    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
-                      ('4', '4'), ('5', '5')]
-
-    title = models.CharField(max_length=255)
-    # this forignkey access  to carowner table, carowned access to Car table
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name='cars')
-    owned_by = models.ForeignKey(
-        CarOwner, on_delete=models.CASCADE, related_name='car_owned')
-    # many to many relationship eg in showroom many cars and one car in many show room
-    carmodel = models.CharField(max_length=50)
-    color = models.CharField(max_length=20)
-    registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
-    mileage = models.IntegerField()
-    fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICE)
-
-    description = models.TextField(null=True)
-    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    last_update = models.DateTimeField(auto_now_add=True)
-    price = models.BigIntegerField()
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class CarWithDealerShip(models.Model):
     FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
                    ('Electric', 'Electric'), ('CNG', 'CNG')]
@@ -139,7 +138,6 @@ class CarWithDealerShip(models.Model):
     # this forignkey access  to carowner table, carowned access to Car table
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name='carswithdealership')
-
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=20)
     registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
@@ -157,7 +155,7 @@ class CarWithDealerShip(models.Model):
 
 class Review(models.Model):
     car = models.ForeignKey(
-        Car, on_delete=models.CASCADE, related_name='reviews')
+        CarWithOwnerShip, on_delete=models.CASCADE, related_name='reviews')
     name = models.CharField(max_length=40)
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)

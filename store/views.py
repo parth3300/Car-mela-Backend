@@ -17,7 +17,7 @@ from .filter import CarFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 
-class CarViewSet(ModelViewSet):
+class CarWithOwnerShipViewSet(ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = CarFilter
@@ -34,8 +34,8 @@ class CarViewSet(ModelViewSet):
 
         if CarOwner.objects.filter(user_id=user.id).exists():
             carowner = CarOwner.objects.get(user=user)
-            return Car.objects.filter(owned_by=carowner)
-        return Car.objects.all()
+            return CarWithOwnerShip.objects.filter(owned_by=carowner)
+        return CarWithOwnerShip.objects.all()
 
     def get_serializer_class(self):
         user = self.request.user
