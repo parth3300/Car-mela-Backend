@@ -1,12 +1,17 @@
 from django_filters.rest_framework import FilterSet
-from .models import CarWithOwnerShip
+from .models import Car,CarOwnerShip
 
 
 class CarFilter(FilterSet):
     class Meta:
-        model = CarWithOwnerShip
+        model = Car
         fields = {
             'company_id': ['exact'],
-            'owned_by_id': ['exact'],
             'price': ['gt', 'lt']
+        }
+class CarOwnerShipFilter(FilterSet):
+    class Meta:
+        model = CarOwnerShip
+        fields = {
+            'carowner_id': ['exact'],
         }

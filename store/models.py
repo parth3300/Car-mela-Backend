@@ -1,35 +1,49 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-
-# Create your models here.
 
 
 class Company(models.Model):
-    title = models.CharField(max_length=255)
-    country = models.CharField(max_length=100)
+    title = models.CharField(max_length=50)
+    country = models.CharField(max_length=30)
     since = models.IntegerField()
 
     def __str__(self) -> str:
         return self.title
 
 
-class CarOwner(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+class Car(models.Model):
+    FUEL_CHOICES = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
+                    ('Electric', 'Electric'), ('CNG', 'CNG')]
+    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
+    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
+                      ('4', '4'), ('5', '5')]
+
+    title = models.CharField(max_length=20)
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name='cars'
     )
-    phone = models.BigIntegerField()
-    address = models.TextField()
+    dealerships = models.ManyToManyField('DealerShip', related_name='cars_at_dealership')
+
+    carmodel = models.CharField(max_length=50)
+    color = models.CharField(max_length=10)
+    registration_year = models.CharField(max_length=10, choices=YEAR_CHOICES)
+    fuel_type = models.CharField(max_length=10, choices=FUEL_CHOICES)
+    mileage = models.IntegerField()
+    description = models.TextField(null=True)
+    price = models.BigIntegerField()
+    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
+    last_update = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user.username
+        return self.title
 
-    def first_name(self):
-        return self.user.first_name
+    @property
+    def carowner(self):
+        return self.car_ownership.carowner.user.username if self.car_ownership else None
 
-    def last_name(self):
-        return self.user.last_name
+    @property
+    def dealership(self):
+        return self.car_dealership.dealership.dealership_name
 
 
 class Customer(models.Model):
@@ -37,10 +51,27 @@ class Customer(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
     phone = models.BigIntegerField()
-    address = models.TextField()
+    personal_address = models.TextField()
+
+    def first_name(self):
+        return self.user.first_name
+
+    def last_name(self):
+        return self.user.last_name
 
     def __str__(self) -> str:
-        return self.user.username
+        return self.user.first_name
+
+
+class CarOwner(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+    phone = models.BigIntegerField()
+    personal_address = models.TextField()
+
+    def __str__(self) -> str:
+        return self.user.first_name
 
     def first_name(self):
         return self.user.first_name
@@ -49,68 +80,47 @@ class Customer(models.Model):
         return self.user.last_name
 
 
-#  for reloading queries/ to  user manage item in database
-
-
-class DealerShipManager(models.Manager):
-    def get_dealerships_for(self, obj_type, obj_id):
-        return self.objects.select_related('dealers').filter(
-            content_type=obj_type, object_id=obj_id)
-
-
-class CarWithOwnerShip(models.Model):
-    FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
-                   ('Electric', 'Electric'), ('CNG', 'CNG')]
-    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
-    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
-                      ('4', '4'), ('5', '5')]
-
-    title = models.CharField(max_length=255)
-    # this forignkey access  to carowner table, carowned access to Car table
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name='carwithownership')
-    owned_by = models.ForeignKey(
-        CarOwner, on_delete=models.CASCADE, related_name='car_owned')
-    carmodel = models.CharField(max_length=50)
-    color = models.CharField(max_length=20)
-    registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
-    mileage = models.IntegerField()
-    fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICE)
-
-    description = models.TextField(null=True)
-    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    last_update = models.DateTimeField(auto_now_add=True)
-    price = models.BigIntegerField()
+class CarOwnerShip(models.Model):
+    car = models.OneToOneField(
+        Car, on_delete=models.CASCADE, related_name='car_ownership'
+    )
+    carowner = models.ForeignKey(
+        CarOwner, on_delete=models.CASCADE, related_name='cars_owned'
+    )
 
     def __str__(self) -> str:
-        return self.title
+        return self.car.title
 
 
 class DealerShip(models.Model):
+    cars = models.ManyToManyField(Car, related_name='dealerships_of_car')
+    featured_car = models.ForeignKey(
+        Car, on_delete=models.CASCADE, related_name='featured_at_dealership', null=True, blank=True
+    )
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
     dealership_name = models.CharField(max_length=50)
+    phone = models.BigIntegerField()
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    phone = models.BigIntegerField()
+    cars = models.ManyToManyField(Car, related_name='dealerships')
 
     def __str__(self) -> str:
         return self.dealership_name
 
 
 class Dealer(models.Model):
-    dealership = models.ForeignKey(
-        DealerShip, on_delete=models.CASCADE, related_name='dealers')
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-
-    personal_address = models.TextField()
+    dealership = models.ForeignKey(
+        DealerShip, on_delete=models.CASCADE, related_name='dealers'
+    )
     phone = models.BigIntegerField()
+    personal_address = models.TextField()
 
     def __str__(self) -> str:
-        return self.user.username
+        return self.user.first_name
 
     def first_name(self):
         return self.user.first_name
@@ -119,43 +129,13 @@ class Dealer(models.Model):
         return self.user.last_name
 
 
-class DealerShipFor(models.Model):
-    objects = DealerShipManager()
-    dealership = models.ForeignKey(DealerShip, on_delete=models.CASCADE)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
-
-
-class CarWithDealerShip(models.Model):
-    FUEL_CHOICE = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
-                   ('Electric', 'Electric'), ('CNG', 'CNG')]
-    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
-    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
-                      ('4', '4'), ('5', '5')]
-
-    title = models.CharField(max_length=255)
-    # this forignkey access  to carowner table, carowned access to Car table
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name='carswithdealership')
-    carmodel = models.CharField(max_length=50)
-    color = models.CharField(max_length=20)
-    registration_year = models.CharField(max_length=50, choices=YEAR_CHOICES)
-    mileage = models.IntegerField()
-    fuel_type = models.CharField(max_length=20, choices=FUEL_CHOICE)
-
-    description = models.TextField(null=True)
-    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    last_update = models.DateTimeField(auto_now_add=True)
-    price = models.BigIntegerField()
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class Review(models.Model):
     car = models.ForeignKey(
-        CarWithOwnerShip, on_delete=models.CASCADE, related_name='reviews')
-    name = models.CharField(max_length=40)
+        Car, on_delete=models.CASCADE, related_name='reviews'
+    )
+    name = models.CharField(max_length=20)
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Review for {self.car.title} by {self.name}"

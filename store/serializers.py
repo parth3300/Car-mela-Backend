@@ -1,21 +1,21 @@
-from .models import *
 from rest_framework import serializers
 from caruser.serializers import UserSerializer
-
-# for all users
+from .models import Company, Car, Customer, CarOwner, CarOwnerShip, DealerShip, Dealer, Review
+from django.urls import reverse
 
 
 class CompanySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Company
-        fields = ['title', 'country', 'since']
-
-# for admin
+        fields = ['id', 'title', 'country', 'since']
 
 
 class AdminCompanySerializer(serializers.ModelSerializer):
+    cars_count = serializers.SerializerMethodField()
     cars = serializers.SerializerMethodField()
+
+    def get_cars_count(self, company):
+        return company.cars.count()
 
     def get_cars(self, company):
         return [car.title for car in company.cars.all()]
@@ -25,163 +25,122 @@ class AdminCompanySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# for dealer users
+class CarSerializer(serializers.ModelSerializer):
+    carowner = serializers.SerializerMethodField(read_only=True)
+    dealership = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Car
+        fields = ['id', 'title', 'company', 'carmodel', 'color', 'registration_year', 'fuel_type',
+                  'mileage', 'description', 'price', 'ratings', 'dealership', 'carowner']
+
+    def get_carowner(self, car):
+        try:
+            car_ownership = car.car_ownership
+            return car_ownership.carowner.user.username if car_ownership else None
+        except CarOwnerShip.DoesNotExist:
+            return 'Not Owned'
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField(read_only=True)
+
+    def get_name(self, customer):
+        return f'{customer.user.username} {customer.user.last_name}'
+
+    class Meta:
+        model = Customer
+        fields = ['id', 'name', 'phone', 'personal_address']
+
+
+class CarOwnerSerializer(serializers.ModelSerializer):
+    my_cars = serializers.SerializerMethodField()
+    cars_count = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField(read_only=True)
+
+    def get_cars_count(self, carowner):
+        return carowner.cars_owned.count()
+
+    def get_my_cars(self, carowner):
+        return [carownership.car.title for carownership in carowner.cars_owned.all()]
+
+    def get_name(self, carowner):
+        return f'{carowner.user.username}'
+
+    class Meta:
+        model = CarOwner
+        fields = ['id', 'name', 'cars_count', 'my_cars', 'phone']
+
+
+class AdminCarOwnerSerializer(serializers.ModelSerializer):
+    cars_owned = serializers.SerializerMethodField()
+    cars_count = serializers.SerializerMethodField()
+
+    def get_cars_count(self, carowner):
+        return carowner.cars_owned.count()
+
+    def get_cars_owned(self, carowner):
+        return [carownership.car.title for carownership in carowner.cars_owned.all()]
+
+    class Meta:
+        model = CarOwner
+        fields = '__all__'
+
+
+class CarOwnerShipSerializer(serializers.ModelSerializer):
+    car_details = serializers.HyperlinkedRelatedField(
+        view_name='car-detail', source='car', read_only=True)
+    carowner_details = serializers.HyperlinkedRelatedField(
+        view_name='carowner-detail', source='carowner', read_only=True)
+
+    class Meta:
+        model = CarOwnerShip
+        fields = ['id', 'car', 'car_details', 'carowner', 'carowner_details']
+
+
+
+class SimpleCarSerializer(serializers.Serializer):
+    class Meta:
+        model = Car
+        fields = ['title']
+
+
+class DealerShipSerializer(serializers.ModelSerializer):
+    cars_count = serializers.SerializerMethodField(read_only=True)
+    cars_info = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = DealerShip
+        fields = ['id', 'dealership_name', 'cars_count',
+                  'cars_info', 'address', 'ratings', 'phone']
+
+    def get_cars_count(self, dealership):
+        return dealership.cars.count()
+
+    def get_cars_info(self, dealership):
+        # Combine car title and details into a single string
+        return [{'title': car.title, 'details': self.context['request'].build_absolute_uri(reverse('car-detail', args=[car.pk]))} for car in dealership.cars.all()]
+
+
 class DealerSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
 
     def get_name(self, dealer):
-        return f'{dealer.user.first_name} {dealer.user.last_name}'
+        return f'{dealer.user.username}'
 
     class Meta:
         model = Dealer
-        fields = ['user_id', 'name', 'phone', 'personal_address']
-
-# for admin
+        fields = ['id', 'name', 'dealership', 'phone']
 
 
 class AdminDealerSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Dealer
-        fields = ['id', 'user_id', 'first_name', 'last_name',
-                  'phone', 'personal_address']
-
-# for annomous user
-
-
-class CustomDealerSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField(read_only=True)
-
-    def get_name(self, dealer):
-        return f'{dealer.user.first_name} {dealer.user.last_name}'
-
-    class Meta:
-        model = Dealer
-        fields = ['name', 'phone']
-
-# for all
-
-
-class DealerShipSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = DealerShip
-        fields = "__all__"
-
-# for all users
-
-
-class CarWithDealerShipSerializer(serializers.ModelSerializer):
-    dealership = DealerShipSerializer(read_only=True)
-
-    class Meta:
-        model = CarWithDealerShip
-        fields = "__all__"
-
-# for admin
-
-
-class AdminCarWithDealerShipSerializer(serializers.ModelSerializer):
-    dealership = DealerShipSerializer(many=True)
-
-    class Meta:
-        model = CarWithDealerShip
-        fields = "__all__"
-
-# for carowner users
-
-
-class CarSerializer(serializers.ModelSerializer):
-    owned_by = serializers.SerializerMethodField()
-    company = CompanySerializer()
-
-    def get_owned_by(self, car):
-        user = self.context['request'].user
-        return car.owned_by.user.username
-
-    class Meta:
-        model = CarWithOwnerShip
-        fields = ['id', 'owned_by', 'title', 'company', 'registration_year', 'carmodel', 'color', 'mileage',
-                  'description', 'fuel_type', 'ratings']
-
-# custom mathod for creating car instance
-# for carowner users
-
-
-class CarCreateSerializer(serializers.ModelSerializer):
-    company_title = serializers.SerializerMethodField()
-    owned_by = serializers.SerializerMethodField(read_only=True)
-
-    def get_company_title(self, car):
-        return car.company.title
-
-    def get_owned_by(self, car):
-        user = self.context['request'].user
-
-        return user.username
-
-    class Meta:
-        model = CarWithOwnerShip
-        fields = ['id', 'owned_by', 'title',  'company', 'company_title', 'registration_year', 'carmodel', 'color', 'mileage',
-                  'description', 'fuel_type', 'price', 'ratings']
-        extra_kwargs = {
-            'company': {'write_only': True},
-        }
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        owned_by, created = CarOwner.objects.get_or_create(user=user)
-        validated_data.pop('owned_by', None)
-        car = CarWithOwnerShip.objects.create(owned_by=owned_by, **validated_data)
-        return car
-
-# for admin
-
-
-class AdminCarSerializer(serializers.ModelSerializer):
-
-    carowner = serializers.SerializerMethodField()
-
-    def get_carowner(self, car):
-
-        return car.owned_by.user.username
-
-    class Meta:
-        model = CarWithOwnerShip
         fields = '__all__'
-
-# created carowner details for annonymous user
-
-
-class SimpleCarOwnerSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
-
-    def get_name(self, carowner):
-        return f"{carowner.user.first_name} {carowner.user.last_name}"
-
-    class Meta:
-        model = CarOwner
-        fields = ['name', 'phone', 'address']
-
-# for annonymous user
-
-
-class CustomeCarSerializer(serializers.ModelSerializer):
-
-    company = CompanySerializer()
-    owned_by = SimpleCarOwnerSerializer()
-
-    class Meta:
-        model = CarWithOwnerShip
-        fields = ['id', 'owned_by', 'title', 'company', 'registration_year', 'carmodel', 'color', 'mileage',
-                  'description', 'fuel_type', 'price', 'ratings']
-
-# for all
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    car_title = serializers.SerializerMethodField(
-        method_name='get_car_title', read_only=True)
+    car_title = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
 
     def get_car_title(self, review):
@@ -189,7 +148,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def get_name(self, review):
         car = review.car
-        carowner = CarOwner.objects.only('user').get(car_owned=car)
+        carowner = CarOwner.objects.only('user').get(cars_owned=car)
         return carowner.user.username
 
     class Meta:
@@ -197,54 +156,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'car_title', 'description']
 
     def create(self, validated_data):
-        print(self.context)
         car_id = self.context.get('car_id')
-
-        review = Review.objects.create(
-            car_id=car_id,  **validated_data)
+        review = Review.objects.create(car_id=car_id, **validated_data)
         return review
-
-# for all
-
-
-class CustomerSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField()
-
-    class Meta:
-        model = Customer
-        fields = ['id', 'user_id', 'first_name', 'phone', 'address']
-
-# for carowner users
-
-
-class CarOwnerSerializer(serializers.ModelSerializer):
-    my_cars = serializers.SerializerMethodField()
-    car_count = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-
-    def get_car_count(self, carowner):
-        return carowner.car_owned.count()
-
-    def get_my_cars(self, carowner):
-        return [car.title for car in carowner.car_owned.all()]
-
-    def get_name(self, carowner):
-        return f"{carowner.user.first_name} {carowner.user.last_name}"
-
-    class Meta:
-        model = CarOwner
-        fields = ['name',
-                  'phone', 'address', 'car_count', 'my_cars']
-
-# for admin
-
-
-class AdminCarOwnerSerializer(serializers.ModelSerializer):
-    car_owned = serializers.SerializerMethodField()
-
-    def get_car_owned(self, carowner):
-        return [car.title for car in carowner.car_owned.all()]
-
-    class Meta:
-        model = CarOwner
-        fields = '__all__'

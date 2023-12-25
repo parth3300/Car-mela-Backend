@@ -7,17 +7,21 @@ from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabul
 from django.urls import reverse
 from django.utils.html import format_html, urlencode
 from django.db.models.aggregates import Count
+from . import models
 
 
 # Create your models here.
 
-
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'since', 'country']
+    list_display = ['id', 'title', 'since', 'country', 'listed_cars']
     ordering = ['id']
     search_fields = ['title']
 
+    def listed_cars(self, company):
+        cars = company.cars.all()
+        car_titles = ', '.join(str(car) for car in cars)
+        return car_titles
 
 class PriceFilter(admin.SimpleListFilter):
     title = 'Price'
@@ -36,80 +40,85 @@ class PriceFilter(admin.SimpleListFilter):
             return queryset.filter(price__gt=500000)
 
 
-@admin.register(CarWithOwnerShip)
-class CarWithOwneshipAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'company', 'owned_by', 'carmodel', 'color', 'registration_year_display',
-                    'mileage',  'fuel_type_display', 'price', 'last_update', 'ratings']
+@admin.register(Car)
+class CarAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'company', 'carmodel', 'color', 'registration_year',
+                    'fuel_type', 'mileage',  'price', 'last_update', 'ratings', 'dealership', 'carowner']
     ordering = ['id']
     search_fields = ['title']
-    list_filter = ['owned_by', PriceFilter]
-
-    def registration_year_display(self, obj):
-        return obj.get_registration_year_display()
-
-    def fuel_type_display(self, obj):
-        return obj.get_fuel_type_display()
-
-
-class DealerShipForInline(GenericStackedInline):
-    model = DealerShipFor
-    extra = 1
-
-
-@admin.register(CarWithDealerShip)
-class CarWithDealerShipAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'company', 'carmodel', 'color', 'registration_year_display',
-                    'mileage', 'fuel_type_display', 'price', 'last_update', 'ratings']
     list_per_page = 10
-    ordering = ['id']
-    search_fields = ['title']
-    inlines = [DealerShipForInline]
-
-    def registration_year_display(self, obj):
-        return obj.get_registration_year_display()
-
-    def fuel_type_display(self, obj):
-        return obj.get_fuel_type_display()
+    list_filter = [PriceFilter, 'car_ownership__carowner']
 
 
-@admin.register(CarOwner)
-class CarOwnerAdmin(admin.ModelAdmin):
+@admin.register(models.Customer)
+class CustomerAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'first_name',
-                    'last_name', 'phone', 'address', 'cars_count']
+                    'last_name', 'phone', 'personal_address']
     ordering = ['id']
-    search_fields = ['user__first_name']
+    search_fields = ['user_first_name', 'phone', 'personal_address']
+
+
+@admin.register(models.CarOwner)
+class CarOwnerAdmin(admin.ModelAdmin):
+
+    list_display = ['id', 'user', 'user_details', 'first_name',
+                    'last_name', 'cars_count', 'phone', 'personal_address',]
+    ordering = ['id']
+    search_fields = ['user__first_name', 'phone', 'personal_address']
+    list_filter = ['user']
 
     @admin.display(ordering='cars_count')
     def cars_count(self, carowner):
-        url = reverse('admin:store_carwithownership_changelist')
-        return format_html('<a href="{}?owned_by__id__exact={}">{}</a>', url, carowner.id, carowner.cars_count)
+        url = reverse('admin:store_carownership_changelist')
+        return format_html('<a href="{}?carowner__id__exact={}">{} - View all</a>', url, carowner.id, carowner.cars_count)
+
+    def user_details(self, carowner):
+        url = reverse('admin:caruser_user_changelist')
+        return format_html('<a href="{}?id__exact={}">View details</a>', url, carowner.user.id)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         return super().get_queryset(request).annotate(
-            cars_count=Count('car_owned')
+            cars_count=Count('cars_owned')
         )
 
 
-@admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'first_name',
-                    'last_name', 'phone', 'address']
+@admin.register(CarOwnerShip)
+class CarOwnerShipAdmin(admin.ModelAdmin):
+    list_display = ['id', 'car', 'car_details', 'carowner', 'carowner_details']
     ordering = ['id']
-    search_fields = ['user_first_name']
+    list_filter = ['carowner']
 
+    def car_details(self, car_ownership):
+        url = reverse('admin:store_car_changelist')
+        return format_html('<a href="{}?car_ownership__carowner__id__exact={}">View details</a>', url, car_ownership.carowner.id)
 
-@admin.register(Dealer)
-class DealerAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'dealership', 'first_name',
-                    'last_name', 'phone',  'personal_address']
-    ordering = ['id']
-    search_fields = ['user_first_name']
+    def carowner_details(self, car_ownership):
+        url = reverse('admin:store_carowner_changelist')
+        return format_html('<a href="{}?id__exact={}">View details</a>', url, car_ownership.carowner.id)
 
-# @admin.register(review)
-# class ReviewAdmin(admin.ModelAdmin):
 
 
 @admin.register(DealerShip)
 class DealerShipAdmin(admin.ModelAdmin):
-    list_display = ['id', 'dealership_name', 'address', 'phone', 'ratings']
+    list_display = ['id', 'dealership_name', 
+                    'display_cars', 'address', 'phone', 'ratings']
     ordering = ['id']
+    search_fields = ['dealership_name']
+
+    def display_cars(self, dealership):
+        return ', '.join([car.title for car in dealership.cars.all()])
+    display_cars.short_description = 'Cars'
+
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        return super().get_queryset(request).annotate(
+            cars_count=Count('cars_at_dealership')
+        )
+
+
+@admin.register(Dealer)
+class DealerAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'first_name',
+                    'last_name', 'dealership', 'phone', 'personal_address']
+    ordering = ['id']
+    search_fields = ['user_first_name', 'phone', 'personal_address']
