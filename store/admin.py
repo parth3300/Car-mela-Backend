@@ -23,6 +23,7 @@ class CompanyAdmin(admin.ModelAdmin):
         car_titles = ', '.join(str(car) for car in cars)
         return car_titles
 
+
 class PriceFilter(admin.SimpleListFilter):
     title = 'Price'
     parameter_name = 'price'
@@ -43,7 +44,7 @@ class PriceFilter(admin.SimpleListFilter):
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'company', 'carmodel', 'color', 'registration_year',
-                    'fuel_type', 'mileage',  'price', 'last_update', 'ratings', 'dealership', 'carowner']
+                    'fuel_type', 'mileage',  'price', 'last_update', 'ratings', 'carowner']
     ordering = ['id']
     search_fields = ['title']
     list_per_page = 10
@@ -97,10 +98,9 @@ class CarOwnerShipAdmin(admin.ModelAdmin):
         return format_html('<a href="{}?id__exact={}">View details</a>', url, car_ownership.carowner.id)
 
 
-
 @admin.register(DealerShip)
 class DealerShipAdmin(admin.ModelAdmin):
-    list_display = ['id', 'dealership_name', 
+    list_display = ['id', 'dealership_name',
                     'display_cars', 'address', 'phone', 'ratings']
     ordering = ['id']
     search_fields = ['dealership_name']
@@ -108,7 +108,6 @@ class DealerShipAdmin(admin.ModelAdmin):
     def display_cars(self, dealership):
         return ', '.join([car.title for car in dealership.cars.all()])
     display_cars.short_description = 'Cars'
-
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         return super().get_queryset(request).annotate(

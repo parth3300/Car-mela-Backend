@@ -22,8 +22,9 @@ class Car(models.Model):
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name='cars'
     )
-    dealerships = models.ManyToManyField('DealerShip', related_name='cars_at_dealership')
-
+    dealerships = models.ManyToManyField(
+        'DealerShip', related_name='cars_at_dealership'
+    )
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=10)
     registration_year = models.CharField(max_length=10, choices=YEAR_CHOICES)
@@ -39,11 +40,13 @@ class Car(models.Model):
 
     @property
     def carowner(self):
-        return self.car_ownership.carowner.user.username if self.car_ownership else None
+        return (
+            self.car_ownership.carowner.user.username
+            if hasattr(self, 'car_ownership')
+            else None
+        )
 
-    @property
-    def dealership(self):
-        return self.car_dealership.dealership.dealership_name
+    # Note: Removed the dealership property to avoid circular reference
 
 
 class Customer(models.Model):
@@ -93,7 +96,6 @@ class CarOwnerShip(models.Model):
 
 
 class DealerShip(models.Model):
-    cars = models.ManyToManyField(Car, related_name='dealerships_of_car')
     featured_car = models.ForeignKey(
         Car, on_delete=models.CASCADE, related_name='featured_at_dealership', null=True, blank=True
     )
@@ -103,7 +105,7 @@ class DealerShip(models.Model):
     phone = models.BigIntegerField()
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    cars = models.ManyToManyField(Car, related_name='dealerships')
+    # Removed the extra cars field here
 
     def __str__(self) -> str:
         return self.dealership_name
