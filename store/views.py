@@ -1,19 +1,17 @@
-from django.shortcuts import render
-from .serializers import *
-from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from django.core.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import *
+from .serializers import *
 from store.permissions import IsAdminOrReadOnly
 from django.contrib.auth.models import AnonymousUser
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
-from .filter import CarFilter, CarOwnerShipFilter
-from rest_framework.filters import SearchFilter, OrderingFilter
+from .filter import *
 
 
 class CompanyViewSet(ModelViewSet):
@@ -41,6 +39,7 @@ class CustomerViewSet(ModelViewSet):
 class CarOwnerViewset(ModelViewSet):
     queryset = CarOwner.objects.all()
     permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
         if self.request.user.is_staff:
@@ -49,26 +48,22 @@ class CarOwnerViewset(ModelViewSet):
 
     @action(detail=False, methods=['GET', 'PATCH'], permission_classes=[IsAuthenticated])
     def me(self, request):
-        try:
-            carowner = CarOwner.objects.get(user_id=request.user.id)
+        carowner = get_object_or_404(CarOwner, user=request.user)
+        
+        if request.method == 'GET':
+            serializer = CarOwnerSerializer(carowner)
+            return Response(serializer.data)
 
-            if request.method == 'GET':
-                serializer = CarOwnerSerializer(carowner)
-                return Response(serializer.data)
+        elif request.method == 'PATCH':
+            if carowner.user != request.user:
+                raise PermissionDenied(
+                    "You don't have permission to perform this action.")
 
-            elif request.method == 'PUT':
-                if carowner.user != request.user:
-                    raise PermissionDenied(
-                        "You don't have permission to perform this action.")
-
-                serializer = CarOwnerSerializer(carowner, data=request.data)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response(serializer.data)
-
-        except CarOwner.DoesNotExist:
-            raise PermissionDenied(
-                'Authentication credentials were not provided or the user is not a CarOwner.')
+            serializer = CarOwnerSerializer(
+                carowner, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
 
 class CarOwnerShipViewSet(ModelViewSet):
@@ -78,30 +73,16 @@ class CarOwnerShipViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
-
 class DealerShipViewSet(ModelViewSet):
     queryset = DealerShip.objects.all()
     serializer_class = DealerShipSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
-class DealerViewset(ModelViewSet):
-    queryset = Dealer.objects.all()
-    serializer_class = DealerSerializer
-    permission_classes = [IsAdminOrReadOnly]
-
-    def get_serializer_class(self):
-        if self.request.user.is_staff:
-            return AdminDealerSerializer
-        return DealerSerializer
-
-
 class ReviewViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def get_queryset(self):
-        return Review.objects.filter(car_id=self.kwargs['car_pk'])
-
-    def get_serializer_context(self):
-        return {'car_id': self.kwargs['car_pk']}
+    def perform_create(self, serializer):
+        car_id = self.kwargs['car_pk']
+        serializer.save(car_id=car_id)

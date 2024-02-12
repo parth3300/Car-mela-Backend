@@ -1,8 +1,10 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 
 
 class Company(models.Model):
+    logo = models.ImageField(upload_to='store/images')
     title = models.CharField(max_length=50)
     country = models.CharField(max_length=30)
     since = models.IntegerField()
@@ -18,13 +20,15 @@ class Car(models.Model):
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
 
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=20, null=True)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name='cars'
     )
     dealerships = models.ManyToManyField(
-        'DealerShip', related_name='cars_at_dealership'
+        'DealerShip', related_name='featured_cars'
     )
+    image = models.ImageField(upload_to='store/images')
+
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=10)
     registration_year = models.CharField(max_length=10, choices=YEAR_CHOICES)
@@ -46,41 +50,50 @@ class Car(models.Model):
             else None
         )
 
-    # Note: Removed the dealership property to avoid circular reference
+    def get_absolute_info(self):
+        return reverse('car-detail', args=[str(self.id)])
 
 
 class Customer(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    phone = models.BigIntegerField()
+    contact = models.BigIntegerField()
     personal_address = models.TextField()
 
+    @property
     def first_name(self):
         return self.user.first_name
 
+    @property
     def last_name(self):
         return self.user.last_name
 
     def __str__(self) -> str:
-        return self.user.first_name
+        return self.user.username
 
 
 class CarOwner(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    phone = models.BigIntegerField()
+    profile_pic = models.ImageField(upload_to='store/images')
+    contact = models.BigIntegerField()
     personal_address = models.TextField()
 
-    def __str__(self) -> str:
-        return self.user.first_name
-
+    @property
     def first_name(self):
         return self.user.first_name
 
+    @property
     def last_name(self):
         return self.user.last_name
+
+    def __str__(self) -> str:
+        return self.user.username
+
+    def get_absolute_info(self):
+        return reverse('carowner-detail', args=[str(self.id)])
 
 
 class CarOwnerShip(models.Model):
@@ -96,46 +109,28 @@ class CarOwnerShip(models.Model):
 
 
 class DealerShip(models.Model):
-    featured_car = models.ForeignKey(
-        Car, on_delete=models.CASCADE, related_name='featured_at_dealership', null=True, blank=True
-    )
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
     dealership_name = models.CharField(max_length=50)
-    phone = models.BigIntegerField()
+    contact = models.BigIntegerField()
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
-    # Removed the extra cars field here
 
     def __str__(self) -> str:
         return self.dealership_name
 
-
-class Dealer(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
-    )
-    dealership = models.ForeignKey(
-        DealerShip, on_delete=models.CASCADE, related_name='dealers'
-    )
-    phone = models.BigIntegerField()
-    personal_address = models.TextField()
-
-    def __str__(self) -> str:
-        return self.user.first_name
-
-    def first_name(self):
-        return self.user.first_name
-
-    def last_name(self):
-        return self.user.last_name
+    def get_absolute_info(self):
+        return reverse('dealership-detail', args=[str(self.id)])
 
 
 class Review(models.Model):
+    RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
+                      ('4', '4'), ('5', '5')]
     car = models.ForeignKey(
         Car, on_delete=models.CASCADE, related_name='reviews'
     )
     name = models.CharField(max_length=20)
+    ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
 
