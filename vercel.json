@@ -1,14 +1,13 @@
 {
-	"version": 2,
-	"routes": [
-	  {
-		"src": "/static/(.*)",
-		"dest": "carmela/wsgi.py"
-	  },
-	  {
-		"src": "/(.*)",
-		"dest": "/static/$1"
-	  }
-	]
-  }
-  
+    "builds": [{
+        "src": "carmela/wsgi.py",
+        "use": "@vercel/python",
+        "config": { "maxLambdaSize": "15mb", "runtime": "python3.11" }
+    }],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "carmela/wsgi.py"
+        }
+    ]
+}
