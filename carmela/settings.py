@@ -17,7 +17,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:postgres@localhost:5432/mysite',
+        default='postgresql://postgres:sNPYCEXIdBNNbzsLVpWXhAHWQpYINLwN@ballast.proxy.rlwy.net:25928/railway',
         conn_max_age=600
     )
 }
