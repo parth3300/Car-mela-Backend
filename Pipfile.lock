@@ -232,6 +232,13 @@
             "markers": "python_version >= '3.8'",
             "version": "==4.2.7"
         },
+        "dj-database-url": {
+    "hashes": [
+        "sha256:<hash_value>"
+    ],
+    "index": "pypi",
+    "version": "==0.5.0"
+},
         "django-debug-toolbar": {
             "hashes": [
                 "sha256:af99128c06e8e794479e65ab62cc6c7d1e74e1c19beb44dcbf9bad7a9c017327",
