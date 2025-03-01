@@ -1,1 +1,1 @@
-web: gunicorn carmela.wsgi --log-file -
+web: gunicorn carmela.wsgi --bind 0.0.0.0:$PORT

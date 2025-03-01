@@ -14,21 +14,10 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-DATABASE_URL = "postgresql://postgres:sNPYCEXIdBNNbzsLVpWXhAHWQpYINLwN@ballast.proxy.rlwy.net:25928/railway"
-
-# Parse the database URL manually
+import dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DATABASE_URL.rsplit('/', 1)[-1],  # Extracts "railway"
-        'USER': DATABASE_URL.split('//')[1].split(':')[0],  # Extracts "postgres"
-        'PASSWORD': DATABASE_URL.split(':')[2].split('@')[0],  # Extracts the password
-        'HOST': DATABASE_URL.split('@')[1].split(':')[0],  # Extracts the hostname "ballast.proxy.rlwy.net"
-        'PORT': DATABASE_URL.rsplit(':', 1)[-1].split('/')[0],  # Extracts the port "25928"
-        'CONN_MAX_AGE': 600,
-    }
+    'default': dj_database_url.config(default=os.getenv('postgresql://postgres:sNPYCEXIdBNNbzsLVpWXhAHWQpYINLwN@ballast.proxy.rlwy.net:25928/railway'))
 }
-
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,8 +33,7 @@ SECRET_KEY = 'django-insecure-2uycd-ws$t(r*8)+=yl4vz$v+&4-=@1fe#mnbl4q3y(p^yrc%^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = ['*'] 
 
 
 # Application definition
