@@ -40,8 +40,8 @@ dj-database-url = "==2.3.0"
 tzdata = "==2025.1"
 urllib3 = "==2.3.0"
 uvicorn = "==0.34.0"
-whitenoise = "==6.9.0"
 gunicorn = "*"
+whitenoise = "*"
 
 [dev-packages]
 
