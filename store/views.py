@@ -12,12 +12,13 @@ from .serializers import *
 from store.permissions import IsAdminOrReadOnly
 from django.contrib.auth.models import AnonymousUser
 from .filter import *
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'country']
     ordering_fields = ['since']
@@ -33,7 +34,6 @@ class CarViewSet(ModelViewSet):
     filterset_class = CarFilter
     search_fields = ['title', 'description']
     ordering_fields = ['price', 'last_update']
-    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -42,15 +42,15 @@ class CarViewSet(ModelViewSet):
 class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
-    permission_classes = [IsAdminUser]
 
     def get_serializer_context(self):
         return {'request': self.request}
 
 
 class CarOwnerViewset(ModelViewSet):
+    parser_classes = (MultiPartParser, FormParser)
+
     queryset = CarOwner.objects.all()
-    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):
@@ -92,7 +92,6 @@ class CarOwnerShipViewSet(ModelViewSet):
 class DealerShipViewSet(ModelViewSet):
     queryset = DealerShip.objects.all()
     serializer_class = DealerShipSerializer
-    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['dealership_name']
     ordering_fields = ['ratings']
@@ -104,7 +103,6 @@ class DealerShipViewSet(ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}

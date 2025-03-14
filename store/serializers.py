@@ -156,6 +156,7 @@ class CarOwnerSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
+            "user",
             'profile_pic',
             'cars_count',
             'cars',
