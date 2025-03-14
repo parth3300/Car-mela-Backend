@@ -17,7 +17,6 @@ from .filter import *
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAdminOrReadOnly]
 
 
 class CarViewSet(ModelViewSet):
@@ -27,7 +26,6 @@ class CarViewSet(ModelViewSet):
     filterset_class = CarFilter
     search_fields = ['title', 'description']
     ordering_fields = ['price', 'last_update']
-    permission_classes = [IsAdminOrReadOnly]
 
 
 class CustomerViewSet(ModelViewSet):
