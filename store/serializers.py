@@ -5,10 +5,19 @@ from django.urls import reverse
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    logo = serializers.ImageField(required=False)  # Handles uploads
+    logo_url = serializers.SerializerMethodField()
     cars_count = serializers.SerializerMethodField()
     listed_cars = serializers.SerializerMethodField()
     view_cars = serializers.SerializerMethodField()
-    logo_url = serializers.SerializerMethodField()
+
+    def get_logo_url(self, company):
+        if company.logo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(company.logo.url)
+            return company.logo.url
+        return None
 
     def get_cars_count(self, company):
         return company.cars.count()
@@ -17,17 +26,16 @@ class CompanySerializer(serializers.ModelSerializer):
         return [{'title': car.title, 'id': car.id} for car in company.cars.all()]
 
     def get_view_cars(self, company):
-        return self.context['request'].build_absolute_uri(f'/store/cars/?company_id={company.id}')
-
-    def get_logo_url(self, company):
-        if company.logo:
-            return company.logo.url
-        return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(f'/store/cars/?company_id={company.id}')
+        return f'/store/cars/?company_id={company.id}'
 
     class Meta:
         model = Company
         fields = [
             'id',
+            'logo',
             'logo_url',
             'title',
             'country',
@@ -39,30 +47,41 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class CarSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)  # Handles uploads
+    image_url = serializers.SerializerMethodField()
     dealerships = serializers.SerializerMethodField()
     carowner = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
-    image_url = serializers.SerializerMethodField()
+
+    def get_image_url(self, car):
+        if car.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(car.image.url)
+            return car.image.url
+        return None
 
     def get_dealerships(self, car):
         dealerships = car.dealerships.all()
+        request = self.context.get('request')
         return [
             {
                 'id': dealership.id,
                 'name': dealership.dealership_name,
                 'ratings': dealership.ratings,
-                'view_details': self.context['request'].build_absolute_uri(dealership.get_absolute_info())
+                'view_details': request.build_absolute_uri(dealership.get_absolute_info()) if request else dealership.get_absolute_info()
             }
             for dealership in dealerships
         ]
 
     def get_carowner(self, car):
+        request = self.context.get('request')
         try:
             car_ownership = car.car_ownership
             return {
                 'name': car_ownership.carowner.user.username,
-                'view_detials': self.context['request'].build_absolute_uri(car_ownership.carowner.get_absolute_info())
+                'view_details': request.build_absolute_uri(car_ownership.carowner.get_absolute_info()) if request else car_ownership.carowner.get_absolute_info()
             }
         except CarOwnerShip.DoesNotExist:
             return None
@@ -71,12 +90,14 @@ class CarSerializer(serializers.ModelSerializer):
         return car.company.title if car.company else None
 
     def get_reviews(self, car):
-        return [{'name': review.name, 'ratings': review.ratings, 'description': review.description} for review in car.reviews.all()]
-
-    def get_image_url(self, car):
-        if car.image:
-            return car.image.url
-        return None
+        return [
+            {
+                'name': review.name,
+                'ratings': review.ratings,
+                'description': review.description
+            }
+            for review in car.reviews.all()
+        ]
 
     class Meta:
         model = Car
@@ -84,6 +105,7 @@ class CarSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'company',
+            'image',
             'image_url',
             'dealerships',
             'carmodel',
@@ -116,12 +138,21 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class CarOwnerSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.ImageField(required=False)  # Handles uploads
+    profile_pic_url = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     cars_count = serializers.SerializerMethodField()
     cars = serializers.SerializerMethodField()
     view_cars = serializers.SerializerMethodField()
-    profile_pic_url = serializers.SerializerMethodField()
+
+    def get_profile_pic_url(self, carowner):
+        if carowner.profile_pic:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(carowner.profile_pic.url)
+            return carowner.profile_pic.url
+        return None
 
     def get_name(self, carowner):
         return f'{carowner.user.first_name} {carowner.user.last_name}'
@@ -133,22 +164,27 @@ class CarOwnerSerializer(serializers.ModelSerializer):
         return carowner.cars_owned.count()
 
     def get_cars(self, carowner):
-        return [{'id': carownership.car.id, 'title': carownership.car.title} for carownership in carowner.cars_owned.all()]
+        return [
+            {
+                'id': carownership.car.id,
+                'title': carownership.car.title
+            }
+            for carownership in carowner.cars_owned.all()
+        ]
 
     def get_view_cars(self, carowner):
+        request = self.context.get('request')
         url = reverse('car-list')
-        return self.context['request'].build_absolute_uri(f'{url}?car_ownership__carowner__id={carowner.id}')
-
-    def get_profile_pic_url(self, carowner):
-        if carowner.profile_pic:
-            return carowner.profile_pic.url
-        return None
+        if request:
+            return request.build_absolute_uri(f'{url}?car_ownership__carowner__id={carowner.id}')
+        return f'{url}?car_ownership__carowner__id={carowner.id}'
 
     class Meta:
         model = CarOwner
         fields = [
             'id',
             'name',
+            'profile_pic',
             'profile_pic_url',
             'cars_count',
             'cars',
@@ -159,11 +195,11 @@ class CarOwnerSerializer(serializers.ModelSerializer):
 
 
 class AdminCarOwnerSerializer(CarOwnerSerializer):
-    # Inherits all methods from CarOwnerSerializer
     class Meta(CarOwnerSerializer.Meta):
         fields = [
             'id',
             'name',
+            'profile_pic',
             'profile_pic_url',
             'cars',
             'cars_count',
@@ -180,18 +216,20 @@ class CarOwnerShipSerializer(serializers.ModelSerializer):
 
     def get_car(self, carownership):
         car = carownership.car
+        request = self.context.get('request')
         return {
             'title': car.title,
             'price': car.price,
-            'view_details': self.context['request'].build_absolute_uri(car.get_absolute_info())
+            'view_details': request.build_absolute_uri(car.get_absolute_info()) if request else car.get_absolute_info()
         }
 
     def get_carowner(self, carownership):
         carowner = carownership.carowner
+        request = self.context.get('request')
         return {
             'name': carowner.user.username,
             'cars': carowner.cars_owned.count(),
-            'view_details': self.context['request'].build_absolute_uri(carowner.get_absolute_info())
+            'view_details': request.build_absolute_uri(carowner.get_absolute_info()) if request else carowner.get_absolute_info()
         }
 
     class Meta:
@@ -204,11 +242,12 @@ class DealerShipSerializer(serializers.ModelSerializer):
 
     def get_featured_cars(self, dealership):
         featured_cars = dealership.featured_cars.all()
+        request = self.context.get('request')
         return [
             {
                 'title': featured_car.title,
                 'price': featured_car.price,
-                'view_details': self.context['request'].build_absolute_uri(featured_car.get_absolute_info())
+                'view_details': request.build_absolute_uri(featured_car.get_absolute_info()) if request else featured_car.get_absolute_info()
             }
             for featured_car in featured_cars
         ]

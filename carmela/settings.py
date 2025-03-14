@@ -4,6 +4,13 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import cloudinary
+cloudinary.config( 
+  cloud_name = 'dal18b6wk',       # Replace with your cloud name
+  api_key = '294982374822612',             # Replace with your API key
+  api_secret = 'rQymIHFfvQ6-Cx36ZVh_NDvsf28'        # Replace with your API secret
+)
+
 SECRET_KEY = 'django-insecure-2uycd-ws$t(r*8)+=yl4vz$v+&4-=@1fe#mnbl4q3y(p^yrc%^'
 
 DEBUG = True
@@ -106,7 +113,7 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dal18b6wk',
     'API_KEY': '294982374822612',
-    'API_SECRET': 'your_actual_api_secret',  # Replace with real secret
+    'API_SECRET': 'rQymIHFfvQ6-Cx36ZVh_NDvsf28',  # Replace with real secret
 }
 
 # If you still want to use MEDIA_URL (optional but not needed for Cloudinary)
