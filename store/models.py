@@ -4,7 +4,7 @@ from django.urls import reverse
 
 
 class Company(models.Model):
-    logo = models.ImageField(upload_to='store/images')
+    logo = models.ImageField(upload_to='company_logos/')
     title = models.CharField(max_length=50)
     country = models.CharField(max_length=30)
     since = models.IntegerField()
@@ -27,7 +27,7 @@ class Car(models.Model):
     dealerships = models.ManyToManyField(
         'DealerShip', related_name='featured_cars'
     )
-    image = models.ImageField(upload_to='store/images')
+    image = models.ImageField(upload_to='car_images/')
 
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=10)
@@ -77,7 +77,7 @@ class CarOwner(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    profile_pic = models.ImageField(upload_to='store/images')
+    profile_pic = models.ImageField(upload_to='user_image/')
     contact = models.BigIntegerField()
     personal_address = models.TextField()
 
