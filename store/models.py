@@ -22,7 +22,7 @@ class Car(models.Model):
 
     title = models.CharField(max_length=20, null=True)
     company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name='cars'
+        Company, on_delete=models.CASCADE, related_name='cars', null=True, blank=True  
     )
     dealerships = models.ManyToManyField(
         'DealerShip', related_name='featured_cars'

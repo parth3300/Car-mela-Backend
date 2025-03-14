@@ -25,7 +25,6 @@ h11 = "==0.14.0"
 idna = "==3.10"
 oauthlib = "==3.2.2"
 packaging = "==24.2"
-pillow = "==11.1.0"
 psycopg2-binary = "==2.9.10"
 pycparser = "==2.22"
 pyjwt = "==2.10.1"
@@ -42,6 +41,7 @@ urllib3 = "==2.3.0"
 uvicorn = "==0.34.0"
 gunicorn = "*"
 whitenoise = "*"
+pillow = "*"
 
 [dev-packages]
 
