@@ -10,13 +10,14 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import *
 from .serializers import *
 from store.permissions import IsAdminOrReadOnly
-from django.contrib.auth.models import AnonymousUser
 from .filter import *
+from django.contrib.auth.models import AnonymousUser
 
 
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CarViewSet(ModelViewSet):
@@ -26,6 +27,14 @@ class CarViewSet(ModelViewSet):
     filterset_class = CarFilter
     search_fields = ['title', 'description']
     ordering_fields = ['price', 'last_update']
+    permission_classes = [IsAdminOrReadOnly]
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Allows partial updates, including Cloudinary image uploads for 'image' field.
+        """
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
 
 
 class CustomerViewSet(ModelViewSet):
@@ -46,21 +55,29 @@ class CarOwnerViewset(ModelViewSet):
 
     @action(detail=False, methods=['GET', 'PATCH'], permission_classes=[IsAuthenticated])
     def me(self, request):
+        """
+        Authenticated CarOwner can view and update their own profile,
+        including uploading a new profile_pic via Cloudinary.
+        """
         carowner = get_object_or_404(CarOwner, user=request.user)
-        
+
         if request.method == 'GET':
-            serializer = CarOwnerSerializer(carowner)
+            serializer = CarOwnerSerializer(carowner, context={'request': request})
             return Response(serializer.data)
 
         elif request.method == 'PATCH':
             if carowner.user != request.user:
-                raise PermissionDenied(
-                    "You don't have permission to perform this action.")
+                raise PermissionDenied("You don't have permission to perform this action.")
 
             serializer = CarOwnerSerializer(
-                carowner, data=request.data, partial=True)
+                carowner,
+                data=request.data,
+                partial=True,
+                context={'request': request}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
             return Response(serializer.data)
 
 
@@ -80,7 +97,11 @@ class DealerShipViewSet(ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
+        """
+        Link the review to the correct car via car_pk from the URL.
+        """
         car_id = self.kwargs['car_pk']
         serializer.save(car_id=car_id)

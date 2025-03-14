@@ -1,15 +1,16 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from cloudinary.models import CloudinaryField
 
 
 class Company(models.Model):
-    logo = models.ImageField(upload_to='company_logos/')
+    logo = CloudinaryField('image', null=True, blank=True)
     title = models.CharField(max_length=50)
     country = models.CharField(max_length=30)
     since = models.IntegerField()
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
 
@@ -27,7 +28,9 @@ class Car(models.Model):
     dealerships = models.ManyToManyField(
         'DealerShip', related_name='featured_cars'
     )
-    image = models.ImageField(upload_to='car_images/')
+
+    # ✅ Replaced ImageField with CloudinaryField
+    image = CloudinaryField('image', null=True, blank=True)
 
     carmodel = models.CharField(max_length=50)
     color = models.CharField(max_length=10)
@@ -39,7 +42,7 @@ class Car(models.Model):
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
     last_update = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
     @property
@@ -69,7 +72,7 @@ class Customer(models.Model):
     def last_name(self):
         return self.user.last_name
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.user.username
 
 
@@ -77,7 +80,10 @@ class CarOwner(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    profile_pic = models.ImageField(upload_to='user_image/')
+
+    # ✅ Replaced ImageField with CloudinaryField
+    profile_pic = CloudinaryField('image', null=True, blank=True)
+
     contact = models.BigIntegerField()
     personal_address = models.TextField()
 
@@ -89,7 +95,7 @@ class CarOwner(models.Model):
     def last_name(self):
         return self.user.last_name
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.user.username
 
     def get_absolute_info(self):
@@ -104,7 +110,7 @@ class CarOwnerShip(models.Model):
         CarOwner, on_delete=models.CASCADE, related_name='cars_owned'
     )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.car.title
 
 
@@ -116,7 +122,7 @@ class DealerShip(models.Model):
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.dealership_name
 
     def get_absolute_info(self):
@@ -134,5 +140,5 @@ class Review(models.Model):
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"Review for {self.car.title} by {self.name}"
