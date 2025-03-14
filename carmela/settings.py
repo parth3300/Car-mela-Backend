@@ -2,18 +2,14 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-2uycd-ws$t(r*8)+=yl4vz$v+&4-=@1fe#mnbl4q3y(p^yrc%^'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,16 +17,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_filters',
-    'rest_framework',
-    'djoser',
-    'store',
-    'caruser',
-    'corsheaders',
     
-    # Cloudinary apps
+    # Third-party apps
+    'rest_framework',
+    'django_filters',
+    'djoser',
+    'corsheaders',
+
+    # Cloudinary
     'cloudinary',
     'cloudinary_storage',
+
+    # Your apps
+    'store',
+    'caruser',
 ]
 
 MIDDLEWARE = [
@@ -65,7 +65,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'carmela.wsgi.application'
 
-# DATABASES
+# Database
 DATABASE_URL = "postgresql://postgres:sNPYCEXIdBNNbzsLVpWXhAHWQpYINLwN@ballast.proxy.rlwy.net:25928/railway"
 DATABASES = {
     'default': {
@@ -79,55 +79,49 @@ DATABASES = {
     }
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# STATIC FILES (CSS, JS, IMAGES)
+# ✅ STATIC & MEDIA
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WHITENOISE CONFIG (for static files in production)
 if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CLOUDINARY CONFIGURATION ✅✅✅
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# ✅ Cloudinary media storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dal18b6wk',
     'API_KEY': '294982374822612',
-    'API_SECRET': 'rQymIHFfvQ6-Cx36ZVh_NDvsf28',  # Replace this with your real secret
+    'API_SECRET': 'your_actual_api_secret',  # Replace with real secret
 }
 
-# MEDIA FILES (Cloudinary handles them, but this helps with backwards compatibility)
+# If you still want to use MEDIA_URL (optional but not needed for Cloudinary)
 MEDIA_URL = '/media/'
 
-# CORS CONFIG
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'caruser.User'
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+
 CORS_ALLOW_ALL_ORIGINS = True
 
-# DJANGO REST FRAMEWORK CONFIG
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -144,12 +138,6 @@ SIMPLE_JWT = {
 DJOSER = {
     'SERIALIZERS': {
         'user_create': 'caruser.serializers.UserCreateSerializer',
-        'current_user': 'caruser.serializers.UserSerializer'
+        'current_user': 'caruser.serializers.UserSerializer',
     }
 }
-
-# CUSTOM USER MODEL
-AUTH_USER_MODEL = 'caruser.User'
-
-# DEFAULT AUTO FIELD
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
