@@ -6,18 +6,9 @@ from django.urls import reverse
 
 class CompanySerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(required=False)  # Handles uploads
-    logo_url = serializers.SerializerMethodField()
     cars_count = serializers.SerializerMethodField()
     listed_cars = serializers.SerializerMethodField()
     view_cars = serializers.SerializerMethodField()
-
-    def get_logo_url(self, company):
-        if company.logo:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(company.logo.url)
-            return company.logo.url
-        return None
 
     def get_cars_count(self, company):
         return company.cars.count()
@@ -36,7 +27,6 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'logo',
-            'logo_url',
             'title',
             'country',
             'since',
@@ -48,19 +38,10 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class CarSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False)  # Handles uploads
-    image_url = serializers.SerializerMethodField()
     dealerships = serializers.SerializerMethodField()
     carowner = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
-
-    def get_image_url(self, car):
-        if car.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(car.image.url)
-            return car.image.url
-        return None
 
     def get_dealerships(self, car):
         dealerships = car.dealerships.all()
@@ -106,7 +87,6 @@ class CarSerializer(serializers.ModelSerializer):
             'title',
             'company',
             'image',
-            'image_url',
             'dealerships',
             'carmodel',
             'color',
@@ -139,20 +119,12 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 class CarOwnerSerializer(serializers.ModelSerializer):
     profile_pic = serializers.ImageField(required=False)  # Handles uploads
-    profile_pic_url = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     cars_count = serializers.SerializerMethodField()
     cars = serializers.SerializerMethodField()
     view_cars = serializers.SerializerMethodField()
 
-    def get_profile_pic_url(self, carowner):
-        if carowner.profile_pic:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(carowner.profile_pic.url)
-            return carowner.profile_pic.url
-        return None
 
     def get_name(self, carowner):
         return f'{carowner.user.first_name} {carowner.user.last_name}'
@@ -185,7 +157,6 @@ class CarOwnerSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'profile_pic',
-            'profile_pic_url',
             'cars_count',
             'cars',
             'view_cars',
@@ -200,7 +171,6 @@ class AdminCarOwnerSerializer(CarOwnerSerializer):
             'id',
             'name',
             'profile_pic',
-            'profile_pic_url',
             'cars',
             'cars_count',
             'view_cars',
