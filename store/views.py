@@ -18,7 +18,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'country']
     ordering_fields = ['since']
