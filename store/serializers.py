@@ -182,10 +182,10 @@ class AdminCarOwnerSerializer(CarOwnerSerializer):
 
 
 class CarOwnerShipSerializer(serializers.ModelSerializer):
-    car = serializers.SerializerMethodField()
-    carowner = serializers.SerializerMethodField()
+    car_detail = serializers.SerializerMethodField()
+    carowner_detail = serializers.SerializerMethodField()
 
-    def get_car(self, carownership):
+    def get_car_detail(self, carownership):
         car = carownership.car
         request = self.context.get('request')
         return {
@@ -194,7 +194,7 @@ class CarOwnerShipSerializer(serializers.ModelSerializer):
             'view_details': request.build_absolute_uri(car.get_absolute_info()) if request else car.get_absolute_info()
         }
 
-    def get_carowner(self, carownership):
+    def get_carowner_detail(self, carownership):
         carowner = carownership.carowner
         request = self.context.get('request')
         return {
@@ -205,7 +205,7 @@ class CarOwnerShipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CarOwnerShip
-        fields = ['id', 'car', 'carowner']
+        fields = ['id','car', 'carowner', 'car_detail', 'carowner_detail']
 
 
 class DealerShipSerializer(serializers.ModelSerializer):
