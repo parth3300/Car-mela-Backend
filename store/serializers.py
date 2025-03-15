@@ -239,8 +239,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
     
     def get_user_name(self, review):
-        return f'{review.user.first_name} {review.user.last_name}'
-
+        # If review.user exists and has a first name, use it. Otherwise, use review.name.
+        full_name = f"{review.user.first_name} {review.user.last_name}" if review.user else ""
+        return full_name.strip() or review.name
     class Meta:
         model = Review
         fields = ['id', 'user', 'user_name', 'name', 'ratings', 'description', 'date']
