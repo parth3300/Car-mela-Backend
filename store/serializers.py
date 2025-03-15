@@ -40,7 +40,7 @@ class CarSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False)  # Handles uploads
     dealerships = serializers.SerializerMethodField()
     carowner = serializers.SerializerMethodField()
-    company = serializers.SerializerMethodField()
+    company_title = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
     def get_dealerships(self, car):
@@ -68,7 +68,7 @@ class CarSerializer(serializers.ModelSerializer):
         except CarOwnerShip.DoesNotExist:
             return None
 
-    def get_company(self, car):
+    def get_company_title(self, car):
         return car.company.title if car.company else None
 
     def get_reviews(self, car):
@@ -87,6 +87,7 @@ class CarSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'company',
+            'company_title',
             'image',
             'dealerships',
             'carmodel',
