@@ -138,7 +138,7 @@ class Review(models.Model):
     name = models.CharField(max_length=20, null=True, blank=True)
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
     )
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
     description = models.TextField()
