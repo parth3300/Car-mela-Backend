@@ -244,4 +244,4 @@ class ReviewSerializer(serializers.ModelSerializer):
         return full_name.strip() or review.name
     class Meta:
         model = Review
-        fields = ['id', 'user', 'user_name', 'name', 'ratings', 'description', 'date']
+        fields = ['id', 'car', 'user', 'user_name', 'name', 'ratings', 'description', 'date']

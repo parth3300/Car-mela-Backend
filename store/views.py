@@ -82,7 +82,6 @@ class CarOwnerShipViewSet(ModelViewSet):
     queryset = CarOwnerShip.objects.all()
     serializer_class = CarOwnerShipSerializer
     filterset_class = CarOwnerShipFilter
-    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
