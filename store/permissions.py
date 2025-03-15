@@ -18,10 +18,3 @@ class IsAdminOrCarOwnerOrReadOnly(BasePermission):
         user = request.user
         return user.is_authenticated and (user.is_staff or CarOwner.objects.filter(user=user).exists())
 
-
-class IsAdminOrDealerOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in ["GET", "HEAD", "OPTIONS"]:
-            return True
-        user = request.user
-        return user.is_staff or Dealer.objects.filter(user=user).exists()

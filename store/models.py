@@ -135,7 +135,11 @@ class Review(models.Model):
     car = models.ForeignKey(
         Car, on_delete=models.CASCADE, related_name='reviews'
     )
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, null=True, blank=True)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
