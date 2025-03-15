@@ -136,11 +136,7 @@ class CarOwnerSerializer(serializers.ModelSerializer):
         return carowner.cars_owned.count()
 
     def get_cars(self, carowner):
-        return [
-            {
-                'id': carownership.car.id,
-                'title': carownership.car.title
-            }
+        return [carownership.car.title
             for carownership in carowner.cars_owned.all()
         ]
 
@@ -184,6 +180,7 @@ class AdminCarOwnerSerializer(CarOwnerSerializer):
 class CarOwnerShipSerializer(serializers.ModelSerializer):
     car_detail = serializers.SerializerMethodField()
     carowner_detail = serializers.SerializerMethodField()
+
 
     def get_car_detail(self, carownership):
         car = carownership.car
