@@ -62,6 +62,7 @@ class CarSerializer(serializers.ModelSerializer):
             car_ownership = car.car_ownership
             return {
                 'name': car_ownership.carowner.user.username,
+                'user_id': car_ownership.carowner.user.id,
                 'view_details': request.build_absolute_uri(car_ownership.carowner.get_absolute_info()) if request else car_ownership.carowner.get_absolute_info()
             }
         except CarOwnerShip.DoesNotExist:
