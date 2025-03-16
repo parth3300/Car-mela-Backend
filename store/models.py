@@ -17,7 +17,7 @@ class Company(models.Model):
 class Car(models.Model):
     FUEL_CHOICES = [('Petrol', 'Petrol'), ('Diesel', 'Diesel'),
                     ('Electric', 'Electric'), ('CNG', 'CNG')]
-    YEAR_CHOICES = [(str(year), str(year)) for year in range(2013, 2024)]
+    YEAR_CHOICES = [(str(year), str(year)) for year in range(2000, 2030)]
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
 
