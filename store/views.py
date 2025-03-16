@@ -99,9 +99,14 @@ class DealerShipViewSet(ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
+    def get_queryset(self):
+        """
+        Override the default queryset to filter reviews by car ID.
+        """
+        car_id = self.kwargs.get('car_pk')  # Get car_id from the URL
+        return Review.objects.filter(car_id=car_id)
     def get_serializer_context(self):
         return {'request': self.request}
 
