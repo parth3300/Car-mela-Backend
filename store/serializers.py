@@ -14,8 +14,17 @@ class CompanySerializer(serializers.ModelSerializer):
         return company.cars.count()
 
     def get_listed_cars(self, company):
-        return [{'title': car.title, 'id': car.id} for car in company.cars.all()]
-
+        listed_cars = []
+        for car in company.cars.all():
+            car_data = {
+                'title': car.title,
+                'id': car.id,
+                'carowner_user_id': None  # Default value if any related field is None
+            }
+            if hasattr(car, 'car_ownership') and hasattr(car.car_ownership, 'carowner') and hasattr(car.car_ownership.carowner, 'user'):
+                car_data['carowner_user_id'] = car.car_ownership.carowner.user.id
+            listed_cars.append(car_data)
+        return listed_cars
     def get_view_cars(self, company):
         request = self.context.get('request')
         if request:
