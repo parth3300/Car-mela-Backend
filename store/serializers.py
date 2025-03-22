@@ -165,6 +165,7 @@ class CarOwnerSerializer(serializers.ModelSerializer):
             'name',
             "user",
             'profile_pic',
+            'balance',
             'cars_count',
             'cars',
             'view_cars',

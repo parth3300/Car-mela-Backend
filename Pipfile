@@ -44,6 +44,7 @@ whitenoise = "*"
 pillow = "*"
 cloudinary = "*"
 django-cloudinary-storage = "*"
+stripe = "*"
 
 [dev-packages]
 
