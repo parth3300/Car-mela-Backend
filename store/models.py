@@ -96,7 +96,7 @@ class CarOwner(models.Model):
 
     # ✅ Replaced ImageField with CloudinaryField
     profile_pic = CloudinaryField('image', null=True, blank=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default= 1000000.00)
+    balance = models.BigIntegerField(default= 1000000)
     dial_code = models.IntegerField(default= 91)
     phone_number = models.BigIntegerField()
     personal_address = models.TextField()
