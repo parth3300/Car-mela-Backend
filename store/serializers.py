@@ -125,7 +125,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'name', 'contact', 'personal_address']
+        fields = ['id', 'name', 'dial_code', 'phone_number', 'personal_address']
 
 
 class CarOwnerSerializer(serializers.ModelSerializer):
@@ -169,7 +169,7 @@ class CarOwnerSerializer(serializers.ModelSerializer):
             'cars_count',
             'cars',
             'view_cars',
-            'contact',
+            'dial_code', 'phone_number',
             'email'
         ]
 
@@ -183,7 +183,7 @@ class AdminCarOwnerSerializer(CarOwnerSerializer):
             'cars',
             'cars_count',
             'view_cars',
-            'contact',
+            'dial_code', 'phone_number',
             'email',
             'personal_address'
         ]
@@ -238,7 +238,7 @@ class DealerShipSerializer(serializers.ModelSerializer):
             'id',
             'dealership_name',
             'featured_cars',
-            'contact',
+            'dial_code', 'phone_number',
             'address',
             'ratings'
         ]

@@ -13,7 +13,7 @@ class Company(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.title
 
@@ -49,7 +49,7 @@ class Car(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.title
 
@@ -69,7 +69,8 @@ class Customer(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    contact = models.BigIntegerField()
+    dial_code = models.IntegerField(default= 91)
+    phone_number = models.BigIntegerField()
     personal_address = models.TextField()
 
     @property
@@ -83,7 +84,7 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.user.username
 
@@ -96,7 +97,8 @@ class CarOwner(models.Model):
     # ✅ Replaced ImageField with CloudinaryField
     profile_pic = CloudinaryField('image', null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default= 1000000.00)
-    contact = models.BigIntegerField()
+    dial_code = models.IntegerField(default= 91)
+    phone_number = models.BigIntegerField()
     personal_address = models.TextField()
 
     @property
@@ -110,7 +112,7 @@ class CarOwner(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.user.username
 
@@ -128,7 +130,7 @@ class CarOwnerShip(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.car.title
 
@@ -137,14 +139,15 @@ class DealerShip(models.Model):
     RATING_CHOICES = [('1', '1'), ('2', '2'), ('3', '3'),
                       ('4', '4'), ('5', '5')]
     dealership_name = models.CharField(max_length=50)
-    contact = models.BigIntegerField()
+    dial_code = models.IntegerField(default= 91)
+    phone_number = models.BigIntegerField()
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
 
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return self.dealership_name
 
@@ -170,6 +173,6 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-id'] 
-        
+
     def __str__(self):
         return f"Review for {self.car.title} by {self.name}"
