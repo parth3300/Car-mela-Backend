@@ -51,7 +51,8 @@ class CarSerializer(serializers.ModelSerializer):
     carowner = serializers.SerializerMethodField()
     company_title = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
-
+    average_rating = serializers.SerializerMethodField()
+    
     def get_dealerships(self, car):
         dealerships = car.dealerships.all()
         request = self.context.get('request')
@@ -90,6 +91,25 @@ class CarSerializer(serializers.ModelSerializer):
             for review in car.reviews.all()
         ]
 
+    def get_average_rating(self, car):
+        reviews = car.reviews.all()
+        
+        if not reviews:
+            avg_rating = float(car.ratings) if car.ratings else 0.0
+        else:
+            total_rating = sum(float(review.ratings) for review in reviews)
+            car_rating = float(car.ratings) if car.ratings else 0.0
+            
+            avg_rating = (total_rating + car_rating) / (reviews.count() + 1)
+
+        avg_rating = round(avg_rating)
+
+        ratings_list = [float(review.ratings) for review in reviews]
+
+        return avg_rating
+
+        
+
     class Meta:
         model = Car
         fields = [
@@ -109,7 +129,8 @@ class CarSerializer(serializers.ModelSerializer):
             'ratings',
             'last_update',
             'carowner',
-            'reviews'
+            'reviews',
+            'average_rating'
         ]
 
 
