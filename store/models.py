@@ -10,6 +10,10 @@ class Company(models.Model):
     country = models.CharField(max_length=30)
     since = models.IntegerField()
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.title
 
@@ -42,6 +46,10 @@ class Car(models.Model):
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
     last_update = models.DateTimeField(auto_now_add=True)
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.title
 
@@ -72,6 +80,10 @@ class Customer(models.Model):
     def last_name(self):
         return self.user.last_name
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.user.username
 
@@ -95,6 +107,10 @@ class CarOwner(models.Model):
     def last_name(self):
         return self.user.last_name
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.user.username
 
@@ -110,6 +126,9 @@ class CarOwnerShip(models.Model):
         CarOwner, on_delete=models.CASCADE, related_name='cars_owned'
     )
 
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.car.title
 
@@ -122,6 +141,10 @@ class DealerShip(models.Model):
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return self.dealership_name
 
@@ -144,5 +167,9 @@ class Review(models.Model):
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
 
+
+    class Meta:
+        ordering = ['-id'] 
+        
     def __str__(self):
         return f"Review for {self.car.title} by {self.name}"
