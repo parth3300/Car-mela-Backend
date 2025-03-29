@@ -15,4 +15,11 @@ car_routers = routers.NestedDefaultRouter(
 car_routers.register('reviews', views.ReviewViewSet,
                      basename='car-review')
 
-urlpatterns = router.urls + car_routers.urls
+# Add the Stripe payment URLs
+urlpatterns = [
+    path('create-checkout-session/', views.CreateCheckoutSession.as_view(), name='create-checkout-session'),
+    path('stripe-webhook/', views.stripe_webhook, name='stripe-webhook'),
+]
+
+# Combine all URLs
+urlpatterns += router.urls + car_routers.urls
