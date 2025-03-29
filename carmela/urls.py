@@ -18,8 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from store.views import CreateCheckoutSession, stripe_webhook
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('create-checkout-session/', CreateCheckoutSession.as_view(), name='create-checkout-session'),
+    path('stripe-webhook/', stripe_webhook, name='stripe-webhook'),
     path('store/', include('store.urls')),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
