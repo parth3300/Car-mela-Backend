@@ -81,7 +81,7 @@ class FAQViewSet(BaseViewSet):
 
 
 # Stripe Payment Views
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = "sk_test_51R7s8F09peBWzWCi6rEm8BcWJU0BOdjD2heuhjL3NWXPsMgzbd6SBdZN02kJLJbJJqnWFxzecnECxzMRqvTuVEur003En7iz3V" 
 
 class CreateCheckoutSession(APIView):
     def post(self, request):

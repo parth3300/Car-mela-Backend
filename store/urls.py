@@ -10,6 +10,7 @@ router.register('carowners', views.CarOwnerViewset, basename='carowner')
 router.register('carownerships', views.CarOwnerShipViewSet)
 router.register('dealerships', views.DealerShipViewSet)
 router.register('reviews', views.ReviewViewSet, basename='general-review')
+router.register('faqs', views.FAQViewSet)
 
 car_routers = routers.NestedDefaultRouter(
     router, 'cars', lookup='car')
@@ -19,7 +20,7 @@ car_routers.register('reviews', views.ReviewViewSet,
 # Add the Stripe payment URLd
 urlpatterns = [
     path('create-checkout-session/', views.CreateCheckoutSession.as_view(), name='create-checkout-session'),
-    path('stripe-webhook/', views.stripe_webhook, name='stripe-webhook')
+    path('verify-payment/<str:session_id>/', views.VerifyPayment.as_view(), name='verify-payment'),
 
 ]
 
