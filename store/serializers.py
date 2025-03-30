@@ -146,7 +146,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'name', 'dial_code', 'phone_number', 'email']
+        fields = ['id', 'user', 'name', 'dial_code', 'phone_number', 'email', 'profile_pic', 'registered_date']
 
 
 class CarOwnerSerializer(serializers.ModelSerializer):
@@ -239,7 +239,7 @@ class CarOwnerShipSerializer(serializers.ModelSerializer):
 
 class DealerShipSerializer(serializers.ModelSerializer):
     featured_cars = serializers.SerializerMethodField()
-
+    image = serializers.ImageField(required=False)  # Handles uploads
     def get_featured_cars(self, dealership):
         featured_cars = dealership.featured_cars.all()
         request = self.context.get('request')
@@ -260,6 +260,7 @@ class DealerShipSerializer(serializers.ModelSerializer):
             'featured_cars',
             'dial_code', 'phone_number',
             'address',
+            'image',
             'ratings'
         ]
 
