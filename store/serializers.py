@@ -146,7 +146,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'name', 'dial_code', 'phone_number', 'personal_address']
+        fields = ['id', 'name', 'dial_code', 'phone_number', 'email']
 
 
 class CarOwnerSerializer(serializers.ModelSerializer):
@@ -205,8 +205,7 @@ class AdminCarOwnerSerializer(CarOwnerSerializer):
             'cars_count',
             'view_cars',
             'dial_code', 'phone_number',
-            'email',
-            'personal_address'
+            'email'
         ]
 
 
@@ -275,3 +274,11 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'car', 'user', 'user_name', 'name', 'ratings', 'description', 'date']
+
+
+
+class FAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
+        fields = ['id', 'question', 'answer', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
