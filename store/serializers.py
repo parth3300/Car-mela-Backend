@@ -137,6 +137,7 @@ class CarSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
+    profile_pic = serializers.ImageField(required=False)  # Handles uploads
 
     def get_name(self, customer):
         return f'{customer.user.first_name} {customer.user.last_name}'
