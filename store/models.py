@@ -72,6 +72,8 @@ class Customer(models.Model):
     )
     dial_code = models.IntegerField(default= 91)
     phone_number = models.BigIntegerField()
+    profile_pic = CloudinaryField('image', null=True, blank=True)
+    registered_date = models.DateTimeField(auto_now_add=True)
 
     @property
     def first_name(self):
@@ -142,6 +144,7 @@ class DealerShip(models.Model):
     phone_number = models.BigIntegerField()
     address = models.TextField()
     ratings = models.CharField(max_length=5, choices=RATING_CHOICES)
+    image = CloudinaryField('image', null=True, blank=True)
 
 
     class Meta:
@@ -176,67 +179,12 @@ class Review(models.Model):
     def __str__(self):
         return f"Review for {self.car.title} by {self.name}"
 
-from django.db import models
-from django.conf import settings
-from django.utils import timezone
-
-class ChatSession(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    session_id = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Session {self.session_id} ({self.user or 'Anonymous'})"
-
-class ChatMessage(models.Model):
-    session = models.ForeignKey(
-        ChatSession, 
-        on_delete=models.CASCADE,
-        related_name='messages'
-    )
-    message = models.TextField()
-    is_bot = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['created_at']
-        verbose_name = 'Chat Message'
-        verbose_name_plural = 'Chat Messages'
-
-    def __str__(self):
-        return f"{'Bot' if self.is_bot else 'User'}: {self.message[:50]}..."
-
 class FAQ(models.Model):
     question = models.TextField(unique=True)
-    answer = models.TextField()
+    answer = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'FAQ'
-        verbose_name_plural = 'FAQs'
         ordering = ['-created_at']
-
-    def __str__(self):
-        return f"FAQ: {self.question[:50]}..."
-    
-    question = models.TextField()
-    answer = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = "FAQ"
-        verbose_name_plural = "FAQs"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.question[:50] + "..." if len(self.question) > 50 else self.question
