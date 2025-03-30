@@ -207,28 +207,35 @@ class VerifyPayment(APIView):
             print("\nFetching car details...")
             car = Car.objects.get(id=metadata['car_id'])
             print(f"Car found: {car}")
+            
+            # Serialize the car details
+            car_data = {
+                'id': car.id,
+                'title': car.title,
+                'carmodel': car.model,
+                'price': float(car.price),
+                'image': car.image.url if car.image else None,
+                'ratings': car.ratings,
+                'vin': car.vin,
+                'year': car.year,
+                'color': car.color,
+                'mileage': car.mileage
+            }
 
-            print("\n=== PAYMENT VERIFICATION SUCCESS ===",{
-                'status': 'success',
-                'message': 'Payment verified and ownership recorded',
-                'ownership_id': ownership.id,
-                'car_id': car.id,
-                'session': {
-                    'id': checkout_session.id,
-                    'payment_intent': checkout_session.payment_intent,
-                    'amount_total': checkout_session.amount_total / 100  # Convert to dollars
-                }
-            })
+            print("\n=== PAYMENT VERIFICATION SUCCESS ===")
             return Response({
                 'status': 'success',
                 'message': 'Payment verified and ownership recorded',
                 'ownership_id': ownership.id,
-                'car_id': car.id,
+                'car': car_data,  # Send full car details
                 'session': {
                     'id': checkout_session.id,
                     'payment_intent': checkout_session.payment_intent,
                     'amount_total': checkout_session.amount_total / 100  # Convert to dollars
-                }
+                },
+                'user_id': metadata['carowner_id'],
+                'user_name': request.user.get_full_name() if hasattr(request.user, 'get_full_name') else request.user.username,
+                'user_email': request.user.email
             })
             
         except ObjectDoesNotExist as e:
