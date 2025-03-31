@@ -219,12 +219,12 @@ class VerifyPayment(APIView):
                     'amount_total': checkout_session.amount_total / 100  # Convert to dollars
                 }
             })
-
+            
             return Response({
                 'status': 'success',
                 'message': 'Payment verified and ownership recorded',
-                'customerDetails': ownership,
-                'carDetails': car,
+                'ownership_id': ownership.id,
+                'car_id': car.id,
                 'session': {
                     'id': checkout_session.id,
                     'payment_intent': checkout_session.payment_intent,
