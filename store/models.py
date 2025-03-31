@@ -101,6 +101,7 @@ class CarOwner(models.Model):
     balance = models.BigIntegerField(default= 1000000)
     dial_code = models.IntegerField(default= 91)
     phone_number = models.BigIntegerField()
+    registered_date = models.DateTimeField(auto_now_add=True)
 
     @property
     def first_name(self):

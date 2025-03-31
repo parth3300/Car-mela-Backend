@@ -147,7 +147,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'user', 'name', 'dial_code', 'phone_number', 'email', 'profile_pic', 'registered_date']
+        fields = ['id', 'user', 'name', 'email', 'dial_code', 'phone_number',  'profile_pic', 'registered_date']
 
 
 class CarOwnerSerializer(serializers.ModelSerializer):
@@ -184,15 +184,17 @@ class CarOwnerSerializer(serializers.ModelSerializer):
         model = CarOwner
         fields = [
             'id',
-            'name',
             "user",
+            'name',
+            'email',
+            'dial_code', 'phone_number',
+            'registered_date',
             'profile_pic',
             'balance',
             'cars_count',
             'cars',
             'view_cars',
-            'dial_code', 'phone_number',
-            'email'
+            
         ]
 
 
