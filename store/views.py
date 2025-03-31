@@ -219,8 +219,8 @@ class VerifyPayment(APIView):
                     'amount_total': checkout_session.amount_total / 100  # Convert to dollars
                 }
             })
-            carDetails = Car.objects.filter(car_id=car.id)
-            customerDetails = CarOwner.objects.filter(carowner_id=ownership.id)
+            carDetails = Car.objects.filter(id=car.id)
+            customerDetails = CarOwner.objects.filter(id=ownership.id)
 
             return Response({
                 'status': 'success',
