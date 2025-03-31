@@ -211,7 +211,7 @@ class VerifyPayment(APIView):
             print("\n=== PAYMENT VERIFICATION SUCCESS ===",{
                 'status': 'success',
                 'message': 'Payment verified and ownership recorded',
-                'ownership_id': ownership.id,
+                'carowner_id': ownership.carowner_id,
                 'car_id': car.id,
                 'session': {
                     'id': checkout_session.id,
