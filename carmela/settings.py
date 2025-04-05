@@ -75,8 +75,7 @@ WSGI_APPLICATION = 'carmela.wsgi.application'
 
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51R7s8F09peBWzWCil0ounXGawkhl36OP6aaEfFtVCdp4MpsDTNpvfe6iaEqjr9ksSy3JcD8LLvlx0OehYtWvekCR00FLNBhdd2'
 STRIPE_SECRET_KEY = "sk_test_51R7s8F09peBWzWCi6rEm8BcWJU0BOdjD2heuhjL3NWXPsMgzbd6SBdZN02kJLJbJJqnWFxzecnECxzMRqvTuVEur003En7iz3V" 
-STRIPE_WEBHOOK_SECRET = 'your_webhook_secret'
-FRONTEND_URL = 'http://localhost:3000'
+FRONTEND_URL = 'https://carmela-buy-and-sell-cars.vercel.app'
 # Database
 DATABASE_URL = "postgresql://postgres:sNPYCEXIdBNNbzsLVpWXhAHWQpYINLwN@ballast.proxy.rlwy.net:25928/railway"
 DATABASES = {
