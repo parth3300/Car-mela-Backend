@@ -77,14 +77,15 @@ STRIPE_PUBLISHABLE_KEY = 'pk_test_51R7s8F09peBWzWCil0ounXGawkhl36OP6aaEfFtVCdp4M
 STRIPE_SECRET_KEY = "sk_test_51R7s8F09peBWzWCi6rEm8BcWJU0BOdjD2heuhjL3NWXPsMgzbd6SBdZN02kJLJbJJqnWFxzecnECxzMRqvTuVEur003En7iz3V" 
 FRONTEND_URL = 'https://carmela-buy-and-sell-cars.vercel.app'
 # Database
+DATABASE_URL = "postgresql://postgres:8edz5L#QmufhAeM@db.ymwdndsxjzkubwqgbsha.supabase.co:5432/postgres"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '8edz5L#QmufhAeM',  # special character may cause issues if split dynamically
-        'HOST': 'db.ymwdndsxjzkubwqgbsha.supabase.co',
-        'PORT': '5432',
+        'NAME': DATABASE_URL.rsplit('/', 1)[-1],
+        'USER': DATABASE_URL.split('//')[1].split(':')[0],
+        'PASSWORD': DATABASE_URL.split(':')[2].split('@')[0],
+        'HOST': DATABASE_URL.split('@')[1].split(':')[0],
+        'PORT': DATABASE_URL.rsplit(':', 1)[-1].split('/')[0],
         'CONN_MAX_AGE': 600,
     }
 }
