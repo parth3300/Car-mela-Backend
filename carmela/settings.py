@@ -78,6 +78,7 @@ STRIPE_SECRET_KEY = "sk_test_51R7s8F09peBWzWCi6rEm8BcWJU0BOdjD2heuhjL3NWXPsMgzbd
 FRONTEND_URL = 'https://carmela-buy-and-sell-cars.vercel.app'
 # Database
 DATABASE_URL = "postgresql://postgres:8edz5L#QmufhAeM@db.ymwdndsxjzkubwqgbsha.supabase.co:5432/postgres"
+DATABASE_URL = 'postgresql://postgres.ymwdndsxjzkubwqgbsha:8edz5L#QmufhAeM@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
